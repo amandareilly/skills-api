@@ -2,7 +2,7 @@
 
 """API Version 1 Endpoints
 
-This module contains all the implementation logic for the Version 1 API. 
+This module contains all the implementation logic for the Version 1 API.
 In order to maintain consistency, it mirrors the endpoints module in the
 router package.
 
@@ -36,7 +36,7 @@ MAX_PAGINATION_LIMIT = 500
 DEFAULT_PAGINATION_LIMIT = 20
 
 # ------------------------------------------------------------------------
-# Helper Methods 
+# Helper Methods
 # ------------------------------------------------------------------------
 
 def fake_relevance_score():
@@ -55,7 +55,7 @@ def compute_offset(page, items_per_page):
 
 def compute_page(offset, items_per_page):
     """Calculate the current page number based on offset.
-    
+
     Args:
         offset (int): The offset to use for calculating the page.
         items_per_page (int): Number of items per page.
@@ -65,10 +65,10 @@ def compute_page(offset, items_per_page):
 
 def get_limit_and_offset(args):
     """Calculate the limit and offset to use for pagination
-    
+
     Args:
         args (dict): All parameters passed in via the HTTP request.
-    
+
     """
     limit = 0
     offset = 0
@@ -77,9 +77,9 @@ def get_limit_and_offset(args):
             try:
                 offset = int(args['offset'])
                 if offset < 0:
-                    offset = 0                        
+                    offset = 0
             except:
-                offset = 0                 
+                offset = 0
         else:
             offset = 0
 
@@ -95,14 +95,14 @@ def get_limit_and_offset(args):
     else:
         offset = 0
         limit = DEFAULT_PAGINATION_LIMIT
-    
+
     if limit > MAX_PAGINATION_LIMIT:
         limit = MAX_PAGINATION_LIMIT
 
     return limit, offset
 
 # ------------------------------------------------------------------------
-# API Version 1 Endpoints 
+# API Version 1 Endpoints
 # ------------------------------------------------------------------------
 class AllJobsEndpoint(Resource):
     """All Jobs Endpoint Class"""
@@ -110,7 +110,7 @@ class AllJobsEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of jobs.
 
         Notes:
@@ -143,11 +143,11 @@ class AllJobsEndpoint(Resource):
         current['rel'] = 'self'
         current['href'] = url_link.format(str(offset), str(limit))
         links['links'].append(current)
-        
+
         first['rel'] = 'first'
         first['href'] = url_link.format(str(compute_offset(1, limit)), str(limit))
         links['links'].append(first)
-        
+
         if current_page > 1:
             prev['rel'] = 'prev'
             prev['href'] = url_link.format(str(compute_offset(current_page - 1, limit)), str(limit))
@@ -159,7 +159,7 @@ class AllJobsEndpoint(Resource):
             links['links'].append(next)
 
         last['rel'] = 'last'
-        last['href'] = url_link.format(str(compute_offset(total_pages, limit)), str(limit)) 
+        last['href'] = url_link.format(str(compute_offset(total_pages, limit)), str(limit))
         links['links'].append(last)
 
         if jobs is not None:
@@ -170,9 +170,9 @@ class AllJobsEndpoint(Resource):
                 job_response['normalized_job_title'] = job.nlp_a
                 job_response['parent_uuid'] = job.job_uuid
                 all_jobs.append(job_response)
-            
+
             all_jobs.append(links)
-        
+
             return create_response(all_jobs, 200, custom_headers)
         else:
             return create_error('No jobs were found', 404)
@@ -183,11 +183,11 @@ class AllSkillsEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of skills.
 
         Notes:
-            The endpoint supports pagination. 
+            The endpoint supports pagination.
 
         """
         args = request.args
@@ -216,11 +216,11 @@ class AllSkillsEndpoint(Resource):
         current['rel'] = 'self'
         current['href'] = url_link.format(str(offset), str(limit))
         links['links'].append(current)
-        
+
         first['rel'] = 'first'
         first['href'] = url_link.format(str(compute_offset(1, limit)), str(limit))
         links['links'].append(first)
-        
+
         if current_page > 1:
             prev['rel'] = 'prev'
             prev['href'] = url_link.format(str(compute_offset(current_page - 1, limit)), str(limit))
@@ -232,7 +232,7 @@ class AllSkillsEndpoint(Resource):
             links['links'].append(next)
 
         last['rel'] = 'last'
-        last['href'] = url_link.format(str(compute_offset(total_pages, limit)), str(limit)) 
+        last['href'] = url_link.format(str(compute_offset(total_pages, limit)), str(limit))
         links['links'].append(last)
 
 
@@ -246,7 +246,7 @@ class AllSkillsEndpoint(Resource):
                 skill_response['normalized_skill_name'] = skill.nlp_a
                 all_skills.append(skill_response)
             all_skills.append(links)
-        
+
             return create_response(all_skills, 200, custom_headers)
         else:
             return create_error('No skills were found', 404)
@@ -257,12 +257,12 @@ class JobTitleAutocompleteEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of jobs that partially match the specified search string.
 
         """
         args = request.args
-            
+
         query_mode = ''
         if args is not None:
             if 'begins_with' in args.keys():
@@ -290,7 +290,7 @@ class JobTitleAutocompleteEndpoint(Resource):
                 results = JobAlternateTitle.query.filter(JobAlternateTitle.nlp_a.endswith(search_string.lower())).all()
 
             if len(results) == 0:
-                return create_error('No job title suggestions found', 404)                
+                return create_error('No job title suggestions found', 404)
 
             for result in results:
                 suggestion = OrderedDict()
@@ -310,7 +310,7 @@ class SkillNameAutocompleteEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of skills that partially match the specified search string.
 
         """
@@ -332,7 +332,7 @@ class SkillNameAutocompleteEndpoint(Resource):
 
             search_string = search_string.replace('"','').strip()
             all_suggestions = []
-           
+
             if query_mode == 'begins_with':
                 results = SkillMaster.query.filter(SkillMaster.nlp_a.startswith(search_string.lower())).all()
 
@@ -343,7 +343,7 @@ class SkillNameAutocompleteEndpoint(Resource):
                 results = SkillMaster.query.filter(SkillMaster.nlp_a.endswith(search_string.lower())).all()
 
             if len(results) == 0:
-                return create_error('No skill name suggestions found', 404)                
+                return create_error('No skill name suggestions found', 404)
 
             for result in results:
                 suggestion = OrderedDict()
@@ -362,7 +362,7 @@ class JobTitleNormalizeEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A normalized version of a specified job title.
 
         """
@@ -472,12 +472,12 @@ class JobTitleFromONetCodeEndpoint(Resource):
     def get(self, id=None):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A job associated with its O*NET SOC code or UUID.
 
         Notes:
-            This endpoint actually supports two use cases. It first checks if 
-            the identifier is a valid O*NET SOC code, if not it queries for a 
+            This endpoint actually supports two use cases. It first checks if
+            the identifier is a valid O*NET SOC code, if not it queries for a
             UUID.
 
         """
@@ -534,7 +534,7 @@ class JobTitleFromONetCodeEndpoint(Resource):
                 output['description'] = result.description
                 output['related_job_titles'] = []
                 output['unusual_job_titles'] = []
-                
+
                 # alternate job titles
                 alt_titles = JobAlternateTitle.query.filter_by(job_uuid = result.uuid).all()
                 for alt_title in alt_titles:
@@ -542,7 +542,7 @@ class JobTitleFromONetCodeEndpoint(Resource):
                     title['uuid'] = alt_title.uuid
                     title['title'] = alt_title.title
                     output['related_job_titles'].append(title)
-                
+
                 # unusual job titles
                 other_titles = JobUnusualTitle.query.filter_by(job_uuid = result.uuid).all()
                 for other_title in other_titles:
@@ -550,7 +550,7 @@ class JobTitleFromONetCodeEndpoint(Resource):
                     title['uuid'] = other_title.uuid
                     title['title'] = other_title.title
                     output['unusual_job_titles'].append(title)
-                
+
                 return create_response(output, 200)
 
 class NormalizeSkillNameEndpoint(Resource):
@@ -559,12 +559,12 @@ class NormalizeSkillNameEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A normalized version of a specified skill name.
 
         """
         args = request.args
-        
+
         if args is not None:
             if 'skill_name' in args.keys():
                 search_string = str(args['skill_name'])
@@ -573,11 +573,11 @@ class NormalizeSkillNameEndpoint(Resource):
 
             search_string = search_string.replace('"','').strip()
             all_suggestions = []
-            
+
             results = SkillMaster.query.filter(SkillMaster.skill_name.contains(search_string)).all()
 
             if len(results) == 0:
-                return create_error('No normalized skill names found', 404)                
+                return create_error('No normalized skill names found', 404)
 
             for result in results:
                 suggestion = OrderedDict()
@@ -587,7 +587,7 @@ class NormalizeSkillNameEndpoint(Resource):
 
             return create_response(all_suggestions, 200)
         else:
-            return create_error('No normalized skill names found', 404) 
+            return create_error('No normalized skill names found', 404)
 
 class AssociatedSkillsForJobEndpoint(Resource):
     """Associated Skills For Job Endpoint Class"""
@@ -595,7 +595,7 @@ class AssociatedSkillsForJobEndpoint(Resource):
     def get(self, id=None):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of skills associated with a particular job UUID.
 
         """
@@ -612,11 +612,11 @@ class AssociatedSkillsForJobEndpoint(Resource):
                     job = JobUnusualTitle.query.filter_by(uuid = id).first()
                     if job:
                         parent_uuid = job.job_uuid
-                
+
                 if parent_uuid is not None:
                     #results = JobSkill.query.filter_by(job_uuid = parent_uuid).all()
                     results = SkillImportance.query.filter_by(job_uuid = parent_uuid).all()
-                    
+
             if len(results) > 0:
                 all_skills = OrderedDict()
                 all_skills['job_uuid'] = id
@@ -648,7 +648,7 @@ class AssociatedJobsForSkillEndpoint(Resource):
     def get(self, id=None):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of jobs associated with a specified skill UUID.
 
         """
@@ -685,7 +685,7 @@ class AssociatedJobsForJobEndpoint(Resource):
     def get(self, id=None):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of jobs associated with a specified job UUID.
 
         """
@@ -704,11 +704,11 @@ class AssociatedJobsForJobEndpoint(Resource):
                     parent_uuid = result.job_uuid
             else:
                 parent_uuid = result.uuid
-    
+
             output = OrderedDict()
             output['related_job_titles'] = []
             output['unusual_job_titles'] = []
-                
+
             # alternate job titles
             alt_titles = JobAlternateTitle.query.filter_by(job_uuid = parent_uuid).all()
             for alt_title in alt_titles:
@@ -717,7 +717,7 @@ class AssociatedJobsForJobEndpoint(Resource):
                 title['title'] = alt_title.title
                 title['parent_uuid'] = parent_uuid
                 output['related_job_titles'].append(title)
-                
+
             # unusual job titles
             other_titles = JobUnusualTitle.query.filter_by(job_uuid = parent_uuid).all()
             for other_title in other_titles:
@@ -727,7 +727,7 @@ class AssociatedJobsForJobEndpoint(Resource):
                 title['parent_uuid'] = parent_uuid
                 output['unusual_job_titles'].append(title)
 
-            
+
             return create_response(output, 200)
         else:
             return create_error('No Job UUID specified for query', 400)
@@ -738,7 +738,7 @@ class AssociatedSkillForSkillEndpoint(Resource):
     def get(self, id=None):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of skills associated with a specified skill UUID.
 
         """
@@ -767,7 +767,7 @@ class SkillNameAndFrequencyEndpoint(Resource):
     def get(self, id=None):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             The name and frequency of all skills.
 
         """
@@ -780,7 +780,7 @@ class SkillNameAndFrequencyEndpoint(Resource):
                     search_uuid = job.uuid
                 else:
                     return create_error('Cannot find skills associated with id ' + id, 404)
-                
+
                 #results = JobSkill.query.filter_by(job_uuid = search_uuid).all()
                 results = SkillImportance.query.filter_by(job_uuid = search_uuid).all()
                 if len(results) == 0:
@@ -790,19 +790,19 @@ class SkillNameAndFrequencyEndpoint(Resource):
                     all_skills['job_uuid'] = search_uuid
                     all_skills['title'] = job.title
                     all_skills['skills'] = []
-                    for result in results: 
+                    for result in results:
                         output = OrderedDict()
                         output['skill_uuid'] = result.skill_uuid
                         all_skills['skills'].append(output)
-              
+
                     return create_response(all_skills, 200)
             else:
                 output = OrderedDict()
                 output['uuid'] = result.uuid
                 output['skill_name'] = result.skill_name
-                output['description'] = result.description
+                output['onet_element_id'] = result.onet_element_id
                 output['normalized_skill_name'] = result.nlp_a
-              
+
                 return create_response(output, 200)
 
 class AllUnusualJobsEndpoint(Resource):
@@ -811,7 +811,7 @@ class AllUnusualJobsEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of job titles that fall outside the standard titles used for particular jobs.
 
         """
@@ -825,7 +825,7 @@ class AllUnusualJobsEndpoint(Resource):
                 job_response['description'] = job.description
                 job_response['job_uuid'] = job.job_uuid
                 all_jobs.append(job_response)
-        
+
             return create_response(all_jobs, 200)
         else:
             return create_error('No jobs were found', 404)
@@ -837,7 +837,7 @@ class TitleCountsEndpoint(Resource):
     def get(self):
         """GET operation for the endpoint class.
 
-        Returns: 
+        Returns:
             A collection of jobs.
 
         Notes:
@@ -923,11 +923,11 @@ class TitleCountsEndpoint(Resource):
         current['rel'] = 'self'
         current['href'] = url_link.format(str(offset), str(limit))
         links['links'].append(current)
-        
+
         first['rel'] = 'first'
         first['href'] = url_link.format(str(compute_offset(1, limit)), str(limit))
         links['links'].append(first)
-        
+
         if current_page > 1:
             prev['rel'] = 'prev'
             prev['href'] = url_link.format(str(compute_offset(current_page - 1, limit)), str(limit))
@@ -939,7 +939,7 @@ class TitleCountsEndpoint(Resource):
             links['links'].append(next)
 
         last['rel'] = 'last'
-        last['href'] = url_link.format(str(compute_offset(total_pages, limit)), str(limit)) 
+        last['href'] = url_link.format(str(compute_offset(total_pages, limit)), str(limit))
         links['links'].append(last)
 
         if job_results is not None:
@@ -952,9 +952,9 @@ class TitleCountsEndpoint(Resource):
                 job_response['normalized_job_title'] = None
                 job_response['parent_uuid'] = None
                 all_jobs.append(job_response)
-            
+
             all_jobs.append(links)
-        
+
             return create_response(all_jobs, 200, custom_headers)
         else:
             return create_error('No jobs were found', 404)
